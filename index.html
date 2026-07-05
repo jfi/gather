@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Gather · by Sew Positive — booking prototype</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&family=Open+Sans:wght@400;500;600;700&family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet" />
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        fontFamily: {
+          serif: ['Fraunces', 'Georgia', 'serif'],
+          sans: ['Inter', 'system-ui', 'sans-serif'],
+        },
+        colors: {
+          cream:   'rgb(var(--c-cream) / <alpha-value>)',
+          forest:  { DEFAULT: 'rgb(var(--c-forest) / <alpha-value>)', dark: 'rgb(var(--c-forest-dark) / <alpha-value>)', light: 'rgb(var(--c-tint) / <alpha-value>)' },
+          terra:   'rgb(var(--c-terra) / <alpha-value>)',
+          mustard: 'rgb(var(--c-mustard) / <alpha-value>)',
+          ink:     'rgb(var(--c-ink) / <alpha-value>)',
+        },
+      },
+    },
+  };
+</script>
+<style>
+  /* ---- Theme palettes (toggled via [data-theme] on <html>) ---- */
+  :root {                     /* "Warm" — the original editorial look */
+    --c-cream: 247 242 234;
+    --c-forest: 47 93 80;
+    --c-forest-dark: 36 74 64;
+    --c-tint: 225 236 231;
+    --c-terra: 201 111 74;
+    --c-mustard: 217 164 65;
+    --c-ink: 38 48 44;
+  }
+  [data-theme="brand"] {      /* "Sew Positive" — official brand: teal #32B5B0 + magenta #F20F9D (sampled from the logo in the brand guidelines) */
+    --c-cream: 244 251 251;
+    --c-forest: 23 138 133;   /* readable deep teal (AA) from the brand teal family */
+    --c-forest-dark: 15 110 106;
+    --c-tint: 213 240 239;    /* pale teal */
+    --c-terra: 213 12 140;    /* magenta accent / CTAs — the logo's needle-and-thread pink */
+    --c-mustard: 50 181 176;  /* the true brand teal #32B5B0 for highlights */
+    --c-ink: 51 51 51;        /* #333, per the site */
+  }
+  html { scroll-behavior: smooth; }
+  body { font-family: 'Inter', system-ui, sans-serif; }
+  h1,h2,h3,.font-serif { font-family: 'Fraunces', Georgia, serif; }
+  /* Brand theme swaps fonts to match Sew Positive (Open Sans + a rounded display in place of Osmosis) */
+  [data-theme="brand"] body { font-family: 'Open Sans', system-ui, sans-serif; }
+  [data-theme="brand"] h1, [data-theme="brand"] h2, [data-theme="brand"] h3, [data-theme="brand"] .font-serif { font-family: 'Quicksand', 'Open Sans', sans-serif; letter-spacing: -0.01em; }
+  /* Brand guideline: main website headings are set in upper case */
+  [data-theme="brand"] h1, [data-theme="brand"] h2 { text-transform: uppercase; letter-spacing: 0.02em; }
+  .lvl-dot { width: 8px; height: 8px; border-radius: 9999px; display:inline-block; }
+  [x-cloak] { display:none !important; }
+  .fade-in { animation: fade .25s ease-out; }
+  @keyframes fade { from { opacity:0; transform: translateY(4px);} to {opacity:1; transform:none;} }
+</style>
+</head>
+<body class="bg-cream text-ink antialiased">
+
+<!-- ============ HEADER ============ -->
+<header class="sticky top-0 z-30 bg-cream/95 backdrop-blur border-b border-forest/10">
+  <div class="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+    <button onclick="go('landing')" class="flex items-center gap-2 group">
+      <span class="w-8 h-8 rounded-full bg-forest flex items-center justify-center text-cream font-serif text-lg">G</span>
+      <span class="font-serif text-xl text-forest">Gather</span>
+      <span class="hidden sm:inline text-xs text-ink/50 border-l border-ink/20 pl-2 ml-1">by Sew Positive</span>
+    </button>
+    <div class="hidden sm:flex items-center gap-1 text-xs bg-forest/5 rounded-full p-0.5 border border-forest/10" role="group" aria-label="Theme preview">
+      <span class="pl-2 pr-1 text-ink/40">Theme:</span>
+      <button id="th-warm" onclick="setTheme('warm')" class="px-3 py-1 rounded-full transition">Warm</button>
+      <button id="th-brand" onclick="setTheme('brand')" class="px-3 py-1 rounded-full transition">Sew Positive</button>
+    </div>
+    <nav class="hidden md:flex items-center gap-6 text-sm">
+      <button onclick="go('courses')" class="hover:text-terra transition">Courses</button>
+      <button onclick="go('skill')" class="hover:text-terra transition">Skill levels</button>
+      <button onclick="go('tutors')" class="hover:text-terra transition">Tutors</button>
+      <button onclick="go('info')" class="hover:text-terra transition">Booking info</button>
+      <button onclick="go('courses')" class="bg-forest text-cream px-4 py-2 rounded-full hover:bg-forest-dark transition">Browse courses</button>
+    </nav>
+    <button onclick="go('courses')" class="md:hidden bg-forest text-cream px-3 py-1.5 rounded-full text-sm">Courses</button>
+  </div>
+</header>
+
+<main id="app">
+
+<!-- ============ LANDING ============ -->
+<section data-view="landing" class="fade-in">
+  <div class="relative overflow-hidden">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 py-16 sm:py-24 grid md:grid-cols-2 gap-10 items-center">
+      <div>
+        <span class="inline-block bg-forest-light text-forest text-xs font-medium px-3 py-1 rounded-full mb-4">A social enterprise by Sew Positive</span>
+        <h1 class="text-4xl sm:text-5xl leading-tight text-forest mb-5">Learn to sew, stitch and make — and support our charitable work.</h1>
+        <p class="text-lg text-ink/70 mb-8 max-w-lg">Gather offers paid sewing, textile and creative workshops led by brilliant tutors. Every place you book helps fund free places for people supported by Sew Positive.</p>
+        <div class="flex flex-wrap gap-3">
+          <button onclick="go('courses')" class="bg-terra text-white px-6 py-3 rounded-full font-medium hover:opacity-90 transition">Browse the programme</button>
+          <button onclick="go('skill')" class="border border-forest/30 text-forest px-6 py-3 rounded-full font-medium hover:bg-forest-light transition">Find your skill level</button>
+        </div>
+        <p class="text-sm text-ink/50 mt-6">19 workshops this season · Beginner to Advanced · Cambridge</p>
+      </div>
+      <div class="relative">
+        <div class="aspect-[4/5] rounded-3xl overflow-hidden shadow-xl bg-forest">
+          <img src="https://images.unsplash.com/photo-1630930678172-63343537a00a?w=900&q=70&auto=format&fit=crop" alt="A sewing workshop in progress" class="w-full h-full object-cover" onerror="this.style.display='none'">
+          <div class="absolute inset-0 bg-gradient-to-t from-forest/90 via-forest/25 to-transparent"></div>
+          <div class="absolute bottom-0 p-6 text-cream">
+            <p class="font-serif text-2xl mb-1">Every stitch gives back</p>
+            <p class="text-sm text-cream/85">Profits from Gather workshops fund Sew Positive's free, ballot-allocated places for participants.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- how it relates -->
+  <div class="bg-white/50 border-y border-forest/10">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 py-14 grid sm:grid-cols-3 gap-8">
+      <div>
+        <div class="w-10 h-10 rounded-full bg-forest-light text-forest flex items-center justify-center mb-3 font-serif">1</div>
+        <h3 class="text-lg text-forest mb-1">Book a paid place</h3>
+        <p class="text-sm text-ink/70">Open to the public and to Sew Positive volunteers. Pay securely online, or apply to pay by instalments on longer courses.</p>
+      </div>
+      <div>
+        <div class="w-10 h-10 rounded-full bg-forest-light text-forest flex items-center justify-center mb-3 font-serif">2</div>
+        <h3 class="text-lg text-forest mb-1">Free ballot places</h3>
+        <p class="text-sm text-ink/70">Selected courses hold free places for Sew Positive participants, volunteers, trustees, ambassadors and peer-support leaders, allocated by random ballot.</p>
+      </div>
+      <div>
+        <div class="w-10 h-10 rounded-full bg-forest-light text-forest flex items-center justify-center mb-3 font-serif">3</div>
+        <h3 class="text-lg text-forest mb-1">Profits fund the mission</h3>
+        <p class="text-sm text-ink/70">Surplus from every workshop goes straight back into Sew Positive's charitable programmes.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="max-w-6xl mx-auto px-4 sm:px-6 py-14">
+    <div class="flex items-end justify-between mb-6">
+      <h2 class="text-2xl text-forest">Coming up soon</h2>
+      <button onclick="go('courses')" class="text-terra text-sm hover:underline">See all courses →</button>
+    </div>
+    <div id="featured" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-5"></div>
+  </div>
+</section>
+
+<!-- ============ COURSES LISTING ============ -->
+<section data-view="courses" class="hidden">
+  <div class="max-w-6xl mx-auto px-4 sm:px-6 py-10">
+    <h1 class="text-3xl text-forest mb-1">The programme</h1>
+    <p class="text-ink/60 mb-8">Filter and sort to find your workshop. <span id="resultCount" class="font-medium text-forest"></span></p>
+
+    <div class="grid lg:grid-cols-[260px_1fr] gap-8">
+      <!-- filters -->
+      <aside class="lg:sticky lg:top-20 lg:self-start bg-white/60 rounded-2xl border border-forest/10 p-5 space-y-6">
+        <div class="flex items-center justify-between">
+          <h2 class="font-serif text-lg text-forest">Filter</h2>
+          <button onclick="resetFilters()" class="text-xs text-terra hover:underline">Reset</button>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold uppercase tracking-wide text-ink/50 mb-2">Course type</label>
+          <div id="f-type" class="space-y-1.5 text-sm"></div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold uppercase tracking-wide text-ink/50 mb-2">Skill level</label>
+          <div id="f-level" class="space-y-1.5 text-sm"></div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold uppercase tracking-wide text-ink/50 mb-2">Max price: <span id="priceLabel" class="text-forest font-medium"></span></label>
+          <input id="f-price" type="range" min="0" max="250" step="5" value="250" class="w-full accent-terra" oninput="applyFilters()" />
+        </div>
+
+        <label class="flex items-center gap-2 text-sm cursor-pointer">
+          <input id="f-ballot" type="checkbox" class="accent-forest" onchange="applyFilters()" />
+          Has free ballot places
+        </label>
+      </aside>
+
+      <!-- results -->
+      <div>
+        <div class="flex items-center justify-between mb-4">
+          <div class="text-sm text-ink/60">Sort by</div>
+          <select id="sort" onchange="applyFilters()" class="text-sm border border-forest/20 rounded-full px-3 py-1.5 bg-white">
+            <option value="date">Date (soonest)</option>
+            <option value="price-asc">Price (low to high)</option>
+            <option value="price-desc">Price (high to low)</option>
+            <option value="level">Skill level</option>
+          </select>
+        </div>
+        <div id="courseGrid" class="grid sm:grid-cols-2 gap-5"></div>
+        <p id="noResults" class="hidden text-center text-ink/50 py-16">No courses match those filters. <button onclick="resetFilters()" class="text-terra underline">Reset</button></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ COURSE DETAIL ============ -->
+<section data-view="detail" class="hidden">
+  <div id="detailBody" class="max-w-4xl mx-auto px-4 sm:px-6 py-10"></div>
+</section>
+
+<!-- ============ SKILL GUIDE ============ -->
+<section data-view="skill" class="hidden">
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 py-12">
+    <h1 class="text-3xl text-forest mb-2">Skill level guide</h1>
+    <p class="text-ink/60 mb-8">Not sure where you sit? Here's what each level assumes. When in doubt, choose the lower one — our tutors are used to mixed rooms.</p>
+    <div id="skillGuide" class="space-y-4"></div>
+  </div>
+</section>
+
+<!-- ============ TUTORS ============ -->
+<section data-view="tutors" class="hidden">
+  <div class="max-w-5xl mx-auto px-4 sm:px-6 py-12">
+    <h1 class="text-3xl text-forest mb-2">Meet the tutors</h1>
+    <p class="text-ink/60 mb-8">Every Gather workshop is led by an experienced maker. Full profiles will sit on individual tutor pages.</p>
+    <div id="tutorGrid" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-5"></div>
+  </div>
+</section>
+
+<!-- ============ BOOKING INFO ============ -->
+<section data-view="info" class="hidden">
+  <div class="max-w-3xl mx-auto px-4 sm:px-6 py-12 space-y-8">
+    <div>
+      <h1 class="text-3xl text-forest mb-2">Booking information</h1>
+      <p class="text-ink/70">How booking, payment, waitlists, ballots and parking work.</p>
+    </div>
+    <div class="space-y-5 text-sm text-ink/80 leading-relaxed">
+      <div class="bg-white/60 rounded-2xl border border-forest/10 p-5">
+        <h3 class="font-serif text-lg text-forest mb-1">Paid places</h3>
+        <p>Anyone can book a paid place, including Sew Positive volunteers. <strong>Current Sew Positive charity participants cannot buy paid places</strong> — free places are available to you by ballot instead. You'll confirm this at checkout.</p>
+      </div>
+      <div class="bg-white/60 rounded-2xl border border-forest/10 p-5">
+        <h3 class="font-serif text-lg text-forest mb-1">Free ballot places</h3>
+        <p>Selected courses hold free places for participants, volunteers, trustees, ambassadors and peer-support leaders. Apply with your name, email and eligibility confirmation before the closing date; places are drawn at random and everyone is notified.</p>
+      </div>
+      <div class="bg-white/60 rounded-2xl border border-forest/10 p-5">
+        <h3 class="font-serif text-lg text-forest mb-1">Waitlists</h3>
+        <p>If a course is full you can join the waitlist. If a place frees up, we'll offer it to the next person in line by email with a time-limited link.</p>
+      </div>
+      <div class="bg-white/60 rounded-2xl border border-forest/10 p-5">
+        <h3 class="font-serif text-lg text-forest mb-1">Parking permits</h3>
+        <p>We have five visitor parking permits for applicable daytime courses. Request one during booking and we'll confirm availability. <strong>Venue access is currently via one flight of stairs</strong> — please tell us about any access needs when you book.</p>
+      </div>
+      <div class="bg-white/60 rounded-2xl border border-forest/10 p-5">
+        <h3 class="font-serif text-lg text-forest mb-1">Paying by instalments</h3>
+        <p>Longer, higher-value courses may be paid in instalments. Where available you'll see the option at checkout.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<!-- ============ FOOTER ============ -->
+<footer class="bg-forest text-cream/90 mt-10">
+  <div class="max-w-6xl mx-auto px-4 sm:px-6 py-10 grid sm:grid-cols-3 gap-8 text-sm">
+    <div>
+      <div class="flex items-center gap-2 mb-3">
+        <span class="w-7 h-7 rounded-full bg-cream text-forest flex items-center justify-center font-serif">G</span>
+        <span class="font-serif text-lg">Gather</span>
+      </div>
+      <p class="text-cream/60">A social enterprise of Sew Positive. Profits fund our charitable work.</p>
+    </div>
+    <div>
+      <h4 class="font-medium mb-2">Explore</h4>
+      <ul class="space-y-1 text-cream/70">
+        <li><button onclick="go('courses')" class="hover:text-white">Courses</button></li>
+        <li><button onclick="go('skill')" class="hover:text-white">Skill levels</button></li>
+        <li><button onclick="go('tutors')" class="hover:text-white">Tutors</button></li>
+        <li><button onclick="go('info')" class="hover:text-white">Booking info</button></li>
+      </ul>
+    </div>
+    <div>
+      <h4 class="font-medium mb-2">Good to know</h4>
+      <ul class="space-y-1 text-cream/70">
+        <li>Ballot places for Sew Positive members</li>
+        <li>Waitlists on full courses</li>
+        <li>Venue access via one flight of stairs</li>
+        <li>sewpositive.org/gather</li>
+      </ul>
+    </div>
+  </div>
+  <div class="border-t border-cream/15 py-4 text-center text-xs text-cream/50">Prototype for proposal purposes · not a live booking system · placeholder photography via Unsplash</div>
+</footer>
+
+<!-- ============ BOOKING MODAL ============ -->
+<div id="bookingModal" class="hidden fixed inset-0 z-50 items-center justify-center p-4">
+  <div class="absolute inset-0 bg-ink/50" onclick="closeBooking()"></div>
+  <div class="relative bg-cream w-full max-w-lg rounded-2xl shadow-2xl max-h-[90vh] overflow-y-auto fade-in">
+    <div id="bookingBody" class="p-6"></div>
+  </div>
+</div>
+
+<!-- ============ BALLOT MODAL ============ -->
+<div id="ballotModal" class="hidden fixed inset-0 z-50 items-center justify-center p-4">
+  <div class="absolute inset-0 bg-ink/50" onclick="closeBallot()"></div>
+  <div class="relative bg-cream w-full max-w-md rounded-2xl shadow-2xl max-h-[90vh] overflow-y-auto fade-in">
+    <div id="ballotBody" class="p-6"></div>
+  </div>
+</div>
+
+<script>
+/* ---------------- DATA (seeded from Sew Positive's Gather model) ---------------- */
+const LEVELS = {
+  Beginner:     { n:1, colour:'#3d7665', blurb:'No experience needed. We start from the very basics — threading a machine, first stitches, following a simple pattern.' },
+  Intermediate: { n:2, colour:'#d9a441', blurb:'You can use a sewing machine confidently and have made a few things. We build technique and tackle more shape and structure.' },
+  Advanced:     { n:3, colour:'#c96f4a', blurb:'You sew independently and want to stretch into drafting, finishing and more ambitious projects.' },
+};
+const TYPES = ['Taster','Workshop','One-day workshop','Multi-session course','Open event'];
+
+const COURSES = [
+  {id:1, title:'Upcycling with Denim — Making a Bag', tutor:'Regina Fox-Galassi', type:'Multi-session course', level:'Intermediate', price:90, sessions:2, dates:'Wed 16 & Sat 26 Jul 2026', time:'10:00–18:00', date:'2026-07-16', capacity:4, ballot:1, booked:2, desc:'Turn old jeans into a bag you\'ll actually carry. Across two days you\'ll cut, construct and finish a sturdy denim tote.'},
+  {id:2, title:'Upcycling with Denim — Making a Vest', tutor:'Regina Fox-Galassi', type:'Multi-session course', level:'Intermediate', price:130, sessions:2, dates:'Tue 15 & Fri 25 Jul 2026', time:'10:00–18:00', date:'2026-07-15', capacity:4, ballot:1, booked:4, desc:'A two-day project reworking denim into a wearable, patchwork-style vest.'},
+  {id:3, title:'Upcycling with Denim — Making an Apron', tutor:'Regina Fox-Galassi', type:'One-day workshop', level:'Intermediate', price:50, sessions:1, dates:'Fri 18 Jul 2026', time:'10:00–16:00', date:'2026-07-18', capacity:4, ballot:1, booked:1, desc:'A single-day workshop making a hard-wearing denim apron — perfect for makers and gardeners.'},
+  {id:4, title:'Upcycling with Denim — Making a Hat', tutor:'Regina Fox-Galassi', type:'Multi-session course', level:'Intermediate', price:60, sessions:2, dates:'Sat 19 & Thu 24 Jul 2026', time:'10:00–14:00', date:'2026-07-19', capacity:4, ballot:1, booked:0, desc:'Two shorter sessions crafting a reversible denim bucket hat.'},
+  {id:5, title:'Upcycling with Denim — Making a Quilt', tutor:'Regina Fox-Galassi', type:'One-day workshop', level:'Intermediate', price:90, sessions:1, dates:'Thu 23 Jul 2026', time:'10:00–18:00', date:'2026-07-23', capacity:3, ballot:1, booked:1, desc:'Piece a small denim quilt in a full day, learning patchwork and quilting basics.'},
+  {id:6, title:'Zero-Waste Sewing — The Shirt', tutor:'Michelle Urvall-Ashraf', type:'One-day workshop', level:'Intermediate', price:200, sessions:1, dates:'Aug–Sep 2026 (date TBC)', time:'10:00–16:00', date:'2026-08-15', capacity:10, ballot:2, booked:3, desc:'Cut and construct a shirt using a zero-waste pattern that uses every scrap of cloth.'},
+  {id:7, title:'Zero-Waste Sewing — Trousers', tutor:'Michelle Urvall-Ashraf', type:'One-day workshop', level:'Intermediate', price:200, sessions:1, dates:'Aug–Sep 2026 (date TBC)', time:'10:00–16:00', date:'2026-08-22', capacity:10, ballot:2, booked:1, desc:'A full day drafting and sewing trousers with a zero-waste approach to cutting.'},
+  {id:8, title:'Sewing with Scraps — Pojagi', tutor:'Michelle Urvall-Ashraf', type:'Workshop', level:'Intermediate', price:75, sessions:1, dates:'One full day or 3 evenings (TBC)', time:'10:00–16:00', date:'2026-09-05', capacity:10, ballot:2, booked:4, desc:'Explore the Korean tradition of pojagi — translucent, seamed patchwork made from scraps.'},
+  {id:9, title:'Learning Brioche Knitting', tutor:'Adam Cleevely', type:'Workshop', level:'Intermediate', price:40, sessions:1, dates:'August 2026 (date TBC)', time:'TBC', date:'2026-08-10', capacity:10, ballot:2, booked:2, desc:'Master the lofty, reversible brioche stitch and its two-colour variations.'},
+  {id:10, title:'Crochet for Calm — An Introduction', tutor:'Jenny Street', type:'Taster', level:'Beginner', price:35, sessions:1, dates:'Date TBC', time:'TBC', date:'2026-09-12', capacity:10, ballot:2, booked:5, desc:'A gentle, mindful introduction to crochet — no experience needed, just come and make.'},
+  {id:11, title:'Drafting Basic Blocks', tutor:'Isla Staveley', type:'Multi-session course', level:'Intermediate', price:230, sessions:6, dates:'Evenings, 6 weeks (TBC)', time:'18:30–20:30', date:'2026-09-15', capacity:8, ballot:2, booked:2, desc:'A six-week evening course drafting the bodice, sleeve and skirt blocks that underpin all dressmaking.'},
+  {id:12, title:'Free-Motion Appliqué', tutor:'Jemma Dell', type:'Taster', level:'Beginner', price:40, sessions:1, dates:'Date TBC (~4 hrs)', time:'10:00–14:00', date:'2026-09-20', capacity:10, ballot:2, booked:0, desc:'Loosen up with free-motion machine appliqué — playful, textural and very forgiving.'},
+  {id:13, title:'Sashiko Workshop', tutor:'Cosmin Diaconu', type:'Workshop', level:'Beginner', price:45, sessions:1, dates:'Tue–Thu (~4 hrs, TBC)', time:'10:00–14:00', date:'2026-09-25', capacity:10, ballot:2, booked:1, desc:'The rhythmic Japanese running-stitch tradition of sashiko, on a small sampler you keep. (Price provisional.)'},
+  {id:14, title:'Weaving Workshop', tutor:'Mia Fernández', type:'One-day workshop', level:'Beginner', price:80, sessions:1, dates:'Wednesday (date TBC)', time:'10:00–16:00', date:'2026-09-30', capacity:8, ballot:2, booked:3, desc:'Warp a frame loom and weave a small wall hanging in a relaxed full-day session.'},
+  {id:15, title:'Sew Your Own Christmas Decorations (Family)', tutor:'Helen Moss', type:'Multi-session course', level:'Beginner', price:25, sessions:4, dates:'28–29 Nov & 5–6 Dec 2026', time:'10:00–12:00', date:'2026-11-28', capacity:10, ballot:2, booked:6, desc:'A family-friendly series making felt and fabric decorations for the tree. Suitable for children with an adult.'},
+  {id:16, title:'Stitch a Landscape', tutor:'Lynn Fraser', type:'One-day workshop', level:'Beginner', price:55, sessions:1, dates:'Sat 3 Oct 2026', time:'12:00–17:00', date:'2026-10-03', capacity:12, ballot:0, booked:4, desc:'Build a textile landscape in fabric and thread — layering, raw-edge appliqué and hand stitch.'},
+  {id:17, title:'Machine Sewing for Complete Beginners', tutor:'Siobhan Boakes', type:'Multi-session course', level:'Beginner', price:160, sessions:4, dates:'September 2026, 4 evenings', time:'17:30–20:30', date:'2026-09-08', capacity:10, ballot:2, booked:7, desc:'Twelve hours across four evenings to go from never-touched-a-machine to confidently making.'},
+  {id:18, title:'Intro to Dressmaking', tutor:'Siobhan Boakes', type:'One-day workshop', level:'Beginner', price:140, sessions:1, dates:'September 2026 (date TBC)', time:'09:00–17:00', date:'2026-09-19', capacity:10, ballot:2, booked:2, desc:'A full day making your first simple garment from a commercial pattern.'},
+  {id:19, title:'Sewing Café Sewcial (October)', tutor:'Elke Taylor', type:'Open event', level:'Advanced', price:60, sessions:1, dates:'Sat 31 Oct 2026', time:'TBC', date:'2026-10-31', capacity:11, ballot:1, booked:3, desc:'Bring your own project to a friendly, tutor-supported social sewing session with refreshments.'},
+  {id:20, title:'Sewing Café Sewcial (November)', tutor:'Elke Taylor', type:'Open event', level:'Advanced', price:60, sessions:1, dates:'Sat 28 Nov 2026', time:'TBC', date:'2026-11-28', capacity:11, ballot:1, booked:0, desc:'Bring your own project to a friendly, tutor-supported social sewing session with refreshments.'},
+  {id:21, title:'Sew Positive Frocktails', tutor:'Elke Taylor', type:'Open event', level:'Intermediate', price:40, sessions:1, dates:'Early 2027 (date TBC)', time:'Evening', date:'2027-02-01', capacity:40, ballot:5, booked:12, desc:'Our flagship social: wear something you\'ve made and celebrate handmade style. Open to all.'},
+];
+
+const TUTORS = [...new Set(COURSES.map(c=>c.tutor))].map(name=>({
+  name,
+  count: COURSES.filter(c=>c.tutor===name).length,
+}));
+
+/* ---------------- STATE ---------------- */
+let currentCourse = null;
+
+/* ---------------- HELPERS ---------------- */
+const $ = s => document.querySelector(s);
+function spaces(c){ return Math.max(0, c.capacity - c.booked); }
+function isFull(c){ return spaces(c) <= 0; }
+function levelDot(level){ return `<span class="lvl-dot" style="background:${LEVELS[level].colour}"></span>`; }
+function money(n){ return '£'+n; }
+// Free Unsplash photos (images.unsplash.com — Unsplash licence, no attribution required) mapped per course
+const IMG = {
+  1:'photo-1576995853123-5a10305d93c0', 2:'photo-1637069585336-827b298fe84a', 3:'photo-1531169509526-f8f1fdaa4a67',
+  4:'photo-1541840031508-326b77c9a17e', 5:'photo-1615875622058-8f0c2e9a395b', 6:'photo-1606501126768-b78d4569d3f9',
+  7:'photo-1533758488827-1ed0f9b03899', 8:'photo-1552710307-537199cd41c0', 9:'photo-1632649027900-389e810204e6',
+  10:'photo-1648005539099-709d5be525fb', 11:'photo-1536867520774-5b4f2628a69b', 12:'photo-1641320197434-6ae0ca235048',
+  13:'photo-1671535108620-d169ce916f09', 14:'photo-1773842298512-e49c9331cc3d', 15:'photo-1605743970487-c2c58adbdfba',
+  16:'photo-1657668282135-b620193e7801', 17:'photo-1630930678172-63343537a00a', 18:'photo-1578353022142-09264fd64295',
+  19:'photo-1624516268152-1e48624026ed', 20:'photo-1630920501459-f3e99320c4a5', 21:'photo-1601056639638-c53c50e13ead',
+};
+function courseImg(c){ return `https://images.unsplash.com/${IMG[c.id]}?w=800&q=70&auto=format&fit=crop`; }
+function instalmentEligible(c){ return c.price >= 120; }
+function instalmentPlan(c){ const n = c.sessions >= 3 ? c.sessions : 3; return { n, each: Math.ceil(c.price / n) }; }
+
+/* ---------------- ROUTER ---------------- */
+function go(view){
+  document.querySelectorAll('[data-view]').forEach(s=>s.classList.add('hidden'));
+  const el = document.querySelector(`[data-view="${view}"]`);
+  el.classList.remove('hidden');
+  el.classList.remove('fade-in'); void el.offsetWidth; el.classList.add('fade-in');
+  window.scrollTo({top:0, behavior:'instant'});
+  if(view==='courses') applyFilters();
+}
+
+/* ---------------- CARD ---------------- */
+function courseCard(c){
+  const full = isFull(c);
+  const sp = spaces(c);
+  const badge = full
+    ? `<span class="text-xs bg-terra/15 text-terra px-2 py-0.5 rounded-full">Full · waitlist</span>`
+    : sp<=2 ? `<span class="text-xs bg-mustard/20 text-[#9a6b1a] px-2 py-0.5 rounded-full">${sp} left</span>`
+    : `<span class="text-xs bg-forest-light text-forest px-2 py-0.5 rounded-full">${sp} places</span>`;
+  const ballotTag = c.ballot>0 ? `<span class="text-xs text-forest/70 flex items-center gap-1">🎟️ ${c.ballot} free ballot</span>` : '';
+  return `
+  <div class="bg-white rounded-2xl border border-forest/10 overflow-hidden hover:shadow-lg transition cursor-pointer flex flex-col" onclick="openDetail(${c.id})">
+    <div class="relative h-32 bg-forest-light overflow-hidden">
+      <img src="${courseImg(c)}" alt="${c.title}" loading="lazy" onerror="this.style.display='none'" class="w-full h-full object-cover">
+      <div class="absolute inset-0 bg-gradient-to-t from-black/35 to-transparent"></div>
+      <span class="absolute top-2 left-2 text-xs font-medium text-white bg-black/40 backdrop-blur px-2 py-0.5 rounded-full">${c.type}</span>
+      <span class="absolute top-2 right-2">${badge}</span>
+    </div>
+    <div class="p-4 flex flex-col flex-1">
+      <h3 class="font-serif text-lg text-forest leading-snug mb-1">${c.title}</h3>
+      <p class="text-sm text-ink/60 mb-3">${c.tutor}</p>
+      <div class="flex items-center gap-3 text-xs text-ink/60 mb-3">
+        <span class="flex items-center gap-1">${levelDot(c.level)} ${c.level}</span>
+        <span>·</span><span>${c.dates}</span>
+      </div>
+      <div class="mt-auto flex items-end justify-between pt-3 border-t border-forest/10">
+        <div>
+          <span class="font-serif text-xl text-terra">${money(c.price)}</span>
+          ${instalmentEligible(c) ? `<span class="block text-[11px] text-ink/50 leading-tight">or ${instalmentPlan(c).n} × ${money(instalmentPlan(c).each)}/mo</span>` : ''}
+        </div>
+        <div class="flex items-center gap-2">${ballotTag}</div>
+      </div>
+    </div>
+  </div>`;
+}
+
+/* ---------------- FILTERS ---------------- */
+function buildFilterUI(){
+  $('#f-type').innerHTML = TYPES.map(t=>`
+    <label class="flex items-center gap-2 cursor-pointer">
+      <input type="checkbox" value="${t}" class="accent-forest ftype" onchange="applyFilters()"> ${t}
+    </label>`).join('');
+  $('#f-level').innerHTML = Object.keys(LEVELS).map(l=>`
+    <label class="flex items-center gap-2 cursor-pointer">
+      <input type="checkbox" value="${l}" class="accent-forest flevel" onchange="applyFilters()">
+      <span class="flex items-center gap-1.5">${levelDot(l)} ${l}</span>
+    </label>`).join('');
+}
+function resetFilters(){
+  document.querySelectorAll('.ftype,.flevel').forEach(i=>i.checked=false);
+  $('#f-ballot').checked=false; $('#f-price').value=250; $('#sort').value='date';
+  applyFilters();
+}
+function applyFilters(){
+  const types = [...document.querySelectorAll('.ftype:checked')].map(i=>i.value);
+  const levels = [...document.querySelectorAll('.flevel:checked')].map(i=>i.value);
+  const maxPrice = +$('#f-price').value;
+  const ballotOnly = $('#f-ballot').checked;
+  $('#priceLabel').textContent = maxPrice>=250 ? 'any' : '£'+maxPrice;
+
+  let list = COURSES.filter(c=>
+    (!types.length || types.includes(c.type)) &&
+    (!levels.length || levels.includes(c.level)) &&
+    (c.price<=maxPrice) &&
+    (!ballotOnly || c.ballot>0)
+  );
+  const sort = $('#sort').value;
+  list.sort((a,b)=>{
+    if(sort==='price-asc') return a.price-b.price;
+    if(sort==='price-desc') return b.price-a.price;
+    if(sort==='level') return LEVELS[a.level].n-LEVELS[b.level].n;
+    return new Date(a.date)-new Date(b.date);
+  });
+
+  $('#courseGrid').innerHTML = list.map(courseCard).join('');
+  $('#noResults').classList.toggle('hidden', list.length>0);
+  $('#resultCount').textContent = `${list.length} of ${COURSES.length} shown`;
+}
+
+/* ---------------- DETAIL ---------------- */
+function openDetail(id){
+  const c = COURSES.find(x=>x.id===id); currentCourse=c;
+  const full = isFull(c); const sp = spaces(c);
+  const canInstalment = instalmentEligible(c);
+  $('#detailBody').innerHTML = `
+    <button onclick="go('courses')" class="text-sm text-terra hover:underline mb-6">← Back to courses</button>
+    <div class="grid md:grid-cols-[1fr_320px] gap-8">
+      <div>
+        <span class="inline-block bg-forest-light text-forest text-xs px-3 py-1 rounded-full mb-3">${c.type}</span>
+        <h1 class="text-3xl text-forest mb-2">${c.title}</h1>
+        <p class="text-ink/60 mb-6">with ${c.tutor}</p>
+        <div class="aspect-[16/7] rounded-2xl overflow-hidden mb-6 bg-forest-light">
+          <img src="${courseImg(c)}" alt="${c.title}" onerror="this.parentNode.style.background='linear-gradient(135deg,#2f5d50,#c96f4a)'" class="w-full h-full object-cover">
+        </div>
+        <h2 class="font-serif text-xl text-forest mb-2">About this workshop</h2>
+        <p class="text-ink/80 leading-relaxed mb-6">${c.desc}</p>
+        <div class="grid grid-cols-2 gap-4 text-sm mb-6">
+          <div class="bg-white/60 rounded-xl p-4 border border-forest/10"><div class="text-ink/50 text-xs mb-1">Skill level</div><div class="flex items-center gap-2">${levelDot(c.level)} ${c.level}</div></div>
+          <div class="bg-white/60 rounded-xl p-4 border border-forest/10"><div class="text-ink/50 text-xs mb-1">Sessions</div>${c.sessions} × session${c.sessions>1?'s':''}</div>
+          <div class="bg-white/60 rounded-xl p-4 border border-forest/10"><div class="text-ink/50 text-xs mb-1">Dates</div>${c.dates}</div>
+          <div class="bg-white/60 rounded-xl p-4 border border-forest/10"><div class="text-ink/50 text-xs mb-1">Time</div>${c.time}</div>
+        </div>
+        <div class="text-sm text-ink/60 bg-mustard/10 border border-mustard/30 rounded-xl p-4">
+          <strong>Access:</strong> our venue is currently reached via one flight of stairs. Tell us about any access needs when you book and we'll do our best to help.
+        </div>
+      </div>
+      <aside class="md:sticky md:top-20 md:self-start">
+        <div class="bg-white rounded-2xl border border-forest/10 p-5 shadow-sm">
+          <div class="flex items-baseline justify-between mb-4">
+            <span class="font-serif text-3xl text-terra">${money(c.price)}</span>
+            <span class="text-sm ${full?'text-terra':'text-forest'}">${full?'Full':sp+' places left'}</span>
+          </div>
+          ${full
+            ? `<button onclick="openBooking('waitlist')" class="w-full bg-forest text-cream py-3 rounded-full font-medium hover:bg-forest-dark transition mb-3">Join the waitlist</button>`
+            : `<button onclick="openBooking('pay')" class="w-full bg-terra text-white py-3 rounded-full font-medium hover:opacity-90 transition mb-3">Book &amp; pay online</button>`}
+          ${c.ballot>0 ? `
+            <div class="border-t border-forest/10 pt-3 mt-1">
+              <p class="text-xs text-ink/60 mb-2">🎟️ <strong>${c.ballot} free place${c.ballot>1?'s':''}</strong> for Sew Positive participants, volunteers, trustees, ambassadors &amp; peer-support leaders.</p>
+              <button onclick="openBallot()" class="w-full border border-forest/30 text-forest py-2.5 rounded-full text-sm font-medium hover:bg-forest-light transition">Apply for a ballot place</button>
+            </div>` : ''}
+          ${canInstalment ? `<div class="mt-3 bg-terra/8 border border-terra/25 rounded-xl p-3 text-center">
+            <p class="text-xs text-ink/60 uppercase tracking-wide">Spread the cost</p>
+            <p class="text-sm font-medium text-terra">${instalmentPlan(c).n} monthly payments of ${money(instalmentPlan(c).each)}</p>
+            <p class="text-[11px] text-ink/50 mt-0.5">Choose instalments at checkout</p>
+          </div>`:''}
+        </div>
+      </aside>
+    </div>`;
+  go('detail');
+}
+
+/* ---------------- BOOKING FLOW ---------------- */
+function openBooking(mode){
+  const c = currentCourse;
+  const canInstalment = instalmentEligible(c);
+  const daytime = c.time && c.time.startsWith('1') || c.time && c.time.startsWith('09');
+  if(mode==='waitlist'){
+    $('#bookingBody').innerHTML = `
+      ${bookingHeader(c,'Join the waitlist')}
+      <p class="text-sm text-ink/70 mb-4">This course is full. Add your details and we'll email you if a place frees up — you'll get a time-limited link to grab it.</p>
+      ${field('Full name','wl-name','text','Your name')}
+      ${field('Email','wl-email','email','you@example.com')}
+      <button onclick="confirmWaitlist()" class="w-full bg-forest text-cream py-3 rounded-full font-medium mt-2 hover:bg-forest-dark">Join waitlist</button>`;
+    showModal('#bookingModal'); return;
+  }
+  // pay flow
+  $('#bookingBody').innerHTML = `
+    ${bookingHeader(c,'Book your place')}
+    <div class="space-y-3">
+      ${field('Full name','bk-name','text','Your name')}
+      ${field('Email','bk-email','email','you@example.com')}
+      ${field('Phone (for reminders)','bk-phone','tel','Optional')}
+      <div>
+        <label class="block text-sm font-medium mb-1">Any dietary requirements or allergies?</label>
+        <input id="bk-diet" class="w-full border border-forest/20 rounded-lg px-3 py-2 text-sm" placeholder="Optional — relevant where refreshments are served" />
+      </div>
+      <div>
+        <label class="block text-sm font-medium mb-1">Any access needs?</label>
+        <textarea id="bk-access" rows="2" class="w-full border border-forest/20 rounded-lg px-3 py-2 text-sm" placeholder="Optional — note our venue is currently reached via one flight of stairs"></textarea>
+      </div>
+      ${daytime ? `
+      <label class="flex items-start gap-2 text-sm bg-white/70 border border-forest/10 rounded-lg p-3 cursor-pointer">
+        <input id="bk-parking" type="checkbox" class="accent-forest mt-0.5">
+        <span>Request a visitor <strong>parking permit</strong> for this daytime course <span class="text-ink/50">(5 available — subject to confirmation)</span></span>
+      </label>`:''}
+      ${canInstalment ? `
+      <div>
+        <label class="block text-sm font-medium mb-1">How would you like to pay?</label>
+        <div class="space-y-2 text-sm">
+          <label class="flex items-center justify-between border-2 border-terra/50 bg-terra/5 rounded-xl p-3 cursor-pointer">
+            <span class="flex items-center gap-2"><input type="radio" name="pay" value="full" class="accent-terra" checked> Pay in full today</span>
+            <span class="font-medium">${money(c.price)}</span>
+          </label>
+          <label class="flex items-center justify-between border-2 border-forest/15 rounded-xl p-3 cursor-pointer hover:border-terra/40 transition">
+            <span class="flex items-center gap-2"><input type="radio" name="pay" value="inst" class="accent-terra"> Pay monthly in ${instalmentPlan(c).n} instalments</span>
+            <span class="font-medium whitespace-nowrap">${instalmentPlan(c).n} × ${money(instalmentPlan(c).each)}</span>
+          </label>
+          <p class="text-xs text-ink/50">First instalment is taken today and your place is confirmed straight away; the remaining payments are collected automatically each month.</p>
+        </div>
+      </div>`:''}
+    </div>
+    <div class="bg-terra/10 border border-terra/30 rounded-xl p-3 mt-4">
+      <label class="flex items-start gap-2 text-sm cursor-pointer">
+        <input id="elig" type="checkbox" class="accent-forest mt-0.5" onchange="document.getElementById('payBtn').disabled=!this.checked">
+        <span>I confirm I am <strong>not</strong> a current Sew Positive charity participant (participants have free ballot places instead), and I accept the <button type="button" onclick="alert('Terms &amp; conditions would open here.')" class="text-terra underline">terms &amp; conditions</button>.</span>
+      </label>
+    </div>
+    <button id="payBtn" disabled onclick="confirmPaid()" class="w-full bg-terra text-white py-3 rounded-full font-medium mt-3 disabled:opacity-40 disabled:cursor-not-allowed hover:opacity-90 transition">Confirm &amp; pay securely</button>
+    <p class="text-xs text-ink/40 text-center mt-2">Prototype only — no real payment is taken.</p>`;
+  showModal('#bookingModal');
+}
+
+function bookingHeader(c, action){
+  return `
+  <div class="flex items-start justify-between mb-4">
+    <div>
+      <p class="text-xs text-terra font-medium">${action}</p>
+      <h3 class="font-serif text-xl text-forest leading-snug">${c.title}</h3>
+      <p class="text-sm text-ink/60">${c.dates} · ${money(c.price)}</p>
+    </div>
+    <button onclick="closeBooking()" class="text-ink/40 hover:text-ink text-xl leading-none">&times;</button>
+  </div>`;
+}
+function field(label,id,type,ph){
+  return `<div><label class="block text-sm font-medium mb-1">${label}</label>
+    <input id="${id}" type="${type}" placeholder="${ph}" class="w-full border border-forest/20 rounded-lg px-3 py-2 text-sm"></div>`;
+}
+
+/* ELIGIBILITY POPUP — the key business rule */
+function showEligibility(){
+  const c = currentCourse;
+  $('#bookingBody').innerHTML = `
+    ${bookingHeader(c,'One quick confirmation')}
+    <div class="bg-terra/10 border border-terra/30 rounded-xl p-4 mb-4">
+      <p class="text-sm text-ink/80 leading-relaxed">Paid Gather places are open to the public and to Sew Positive volunteers.</p>
+      <p class="text-sm text-ink/80 leading-relaxed mt-2"><strong>If you are a current Sew Positive charity participant</strong>, please don't buy a paid place — free places are reserved for you through our ballot instead.</p>
+    </div>
+    <label class="flex items-start gap-3 text-sm mb-4 cursor-pointer">
+      <input id="elig" type="checkbox" class="accent-forest mt-0.5" onchange="document.getElementById('payBtn').disabled=!this.checked">
+      <span>I confirm I am <strong>not</strong> a current Sew Positive charity participant, and I've read the <button type="button" onclick="alert('Terms &amp; conditions would open here.')" class="text-terra underline">terms &amp; conditions</button>.</span>
+    </label>
+    <button id="payBtn" disabled onclick="confirmPaid()" class="w-full bg-terra text-white py-3 rounded-full font-medium disabled:opacity-40 disabled:cursor-not-allowed hover:opacity-90">Pay ${money(c.price)} securely</button>
+    <button onclick="openBooking('pay')" class="w-full text-ink/50 text-sm mt-2 hover:text-ink">← Back</button>`;
+}
+function confirmPaid(){
+  const c=currentCourse;
+  const parking = document.getElementById('bk-parking');
+  const inst = document.querySelector('input[name=pay]:checked');
+  const byInst = inst && inst.value==='inst';
+  const plan = instalmentPlan(c);
+  const payLine = byInst
+    ? `Your first instalment of <strong>${money(plan.each)}</strong> has been taken, with ${plan.n-1} further monthly payment${plan.n-1>1?'s':''} to follow.`
+    : `Your payment of <strong>${money(c.price)}</strong> has been received.`;
+  $('#bookingBody').innerHTML = successBox('You\'re booked in! 🎉',
+    `${payLine} A confirmation email is on its way, and we'll send a reminder before ${c.dates.split('(')[0]}.
+     ${parking&&parking.checked?'<br><br>We\'ve noted your <strong>parking permit</strong> request and will confirm availability.':''}`);
+}
+function confirmWaitlist(){
+  $('#bookingBody').innerHTML = successBox('You\'re on the waitlist',
+    `We\'ll email you the moment a place opens up, with a time-limited link to claim it.`);
+}
+function successBox(title,body){
+  return `
+  <div class="text-center py-4">
+    <div class="w-14 h-14 rounded-full bg-forest text-cream flex items-center justify-center text-2xl mx-auto mb-4">✓</div>
+    <h3 class="font-serif text-2xl text-forest mb-2">${title}</h3>
+    <p class="text-sm text-ink/70 leading-relaxed mb-6">${body}</p>
+    <button onclick="closeBooking()" class="bg-forest text-cream px-6 py-2.5 rounded-full font-medium hover:bg-forest-dark">Done</button>
+  </div>`;
+}
+
+/* ---------------- BALLOT ---------------- */
+function openBallot(){
+  const c=currentCourse;
+  $('#ballotBody').innerHTML = `
+    <div class="flex items-start justify-between mb-4">
+      <div>
+        <p class="text-xs text-forest font-medium">🎟️ Free ballot place</p>
+        <h3 class="font-serif text-xl text-forest leading-snug">${c.title}</h3>
+        <p class="text-sm text-ink/60">${c.ballot} free place${c.ballot>1?'s':''} · drawn at random</p>
+      </div>
+      <button onclick="closeBallot()" class="text-ink/40 hover:text-ink text-xl leading-none">&times;</button>
+    </div>
+    <p class="text-sm text-ink/70 mb-4">Free places are for Sew Positive <strong>participants, volunteers, trustees, ambassadors and peer-support leaders</strong>. Apply below — successful applicants are chosen at random after the closing date and everyone is notified by email.</p>
+    ${field('Full name','bl-name','text','Your name')}
+    <div class="mt-3">${field('Email','bl-email','email','you@example.com')}</div>
+    <div class="mt-3">
+      <label class="block text-sm font-medium mb-1">Your connection to Sew Positive</label>
+      <select id="bl-role" class="w-full border border-forest/20 rounded-lg px-3 py-2 text-sm bg-white">
+        <option>Participant</option><option>Volunteer</option><option>Trustee</option><option>Ambassador</option><option>Peer-support leader</option>
+      </select>
+    </div>
+    <label class="flex items-start gap-2 text-sm mt-4 cursor-pointer">
+      <input id="bl-elig" type="checkbox" class="accent-forest mt-0.5" onchange="document.getElementById('blBtn').disabled=!this.checked">
+      <span>I confirm I'm eligible for a ballot place in one of the roles above.</span>
+    </label>
+    <button id="blBtn" disabled onclick="confirmBallot()" class="w-full bg-forest text-cream py-3 rounded-full font-medium mt-4 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-forest-dark">Enter the ballot</button>`;
+  showModal('#ballotModal');
+}
+function confirmBallot(){
+  $('#ballotBody').innerHTML = successBox('You\'re in the ballot',
+    `Thanks — your application is recorded. We\'ll draw places at random after the closing date and email everyone the outcome, successful or not.`);
+}
+
+/* ---------------- MODAL PLUMBING ---------------- */
+function showModal(sel){ const m=$(sel); m.classList.remove('hidden'); m.classList.add('flex'); document.body.style.overflow='hidden'; }
+function closeBooking(){ hide('#bookingModal'); }
+function closeBallot(){ hide('#ballotModal'); }
+function hide(sel){ const m=$(sel); m.classList.add('hidden'); m.classList.remove('flex'); document.body.style.overflow=''; }
+
+/* ---------------- STATIC SECTIONS ---------------- */
+function buildSkillGuide(){
+  $('#skillGuide').innerHTML = Object.entries(LEVELS).map(([name,l])=>`
+    <div class="bg-white/60 rounded-2xl border border-forest/10 p-5 flex gap-4">
+      <div class="w-10 h-10 rounded-full flex items-center justify-center text-white font-serif shrink-0" style="background:${l.colour}">${l.n}</div>
+      <div><h3 class="font-serif text-lg text-forest">${name}</h3><p class="text-sm text-ink/70">${l.blurb}</p></div>
+    </div>`).join('');
+}
+function buildTutors(){
+  $('#tutorGrid').innerHTML = TUTORS.map(t=>`
+    <div class="bg-white rounded-2xl border border-forest/10 p-5">
+      <div class="w-14 h-14 rounded-full bg-forest-light text-forest flex items-center justify-center font-serif text-xl mb-3">${t.name.split(' ').map(w=>w[0]).slice(0,2).join('')}</div>
+      <h3 class="font-serif text-lg text-forest">${t.name}</h3>
+      <p class="text-sm text-ink/60">${t.count} workshop${t.count>1?'s':''} this season</p>
+      <button onclick="go('courses')" class="text-terra text-sm mt-2 hover:underline">See their courses →</button>
+    </div>`).join('');
+}
+function buildFeatured(){
+  const feat = [...COURSES].sort((a,b)=>new Date(a.date)-new Date(b.date)).slice(0,3);
+  $('#featured').innerHTML = feat.map(courseCard).join('');
+}
+
+/* ---------------- THEME TOGGLE ---------------- */
+function setTheme(t){
+  document.documentElement.dataset.theme = (t==='brand') ? 'brand' : '';
+  const warm=$('#th-warm'), brand=$('#th-brand');
+  const on='px-3 py-1 rounded-full transition bg-forest text-cream';
+  const off='px-3 py-1 rounded-full transition text-ink/60 hover:text-ink';
+  if(t==='brand'){ brand.className=on; warm.className=off; }
+  else { warm.className=on; brand.className=off; }
+}
+
+/* ---------------- INIT ---------------- */
+buildFilterUI(); buildSkillGuide(); buildTutors(); buildFeatured(); applyFilters(); setTheme('warm');
+document.addEventListener('keydown', e=>{ if(e.key==='Escape'){ closeBooking(); closeBallot(); }});
+</script>
+</body>
+</html>
