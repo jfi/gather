@@ -160,31 +160,36 @@
 
     <div class="grid lg:grid-cols-[260px_1fr] gap-8">
       <!-- filters -->
-      <aside class="lg:sticky lg:top-20 lg:self-start bg-white/60 rounded-2xl border border-forest/10 p-5 space-y-6">
+      <aside class="lg:sticky lg:top-20 lg:self-start bg-white/60 rounded-2xl border border-forest/10 p-4 lg:p-5 space-y-4 lg:space-y-6">
         <div class="flex items-center justify-between">
-          <h2 class="font-serif text-lg text-forest">Filter</h2>
+          <button onclick="toggleFilters()" class="flex items-center gap-2 font-serif text-lg text-forest lg:pointer-events-none">
+            Filter
+            <svg id="filterChevron" class="w-4 h-4 lg:hidden transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+          </button>
           <button onclick="resetFilters()" class="text-xs text-terra hover:underline">Reset</button>
         </div>
 
-        <div>
-          <label class="block text-xs font-semibold uppercase tracking-wide text-ink/50 mb-2">Course type</label>
-          <div id="f-type" class="space-y-1.5 text-sm"></div>
-        </div>
+        <div id="filterBody" class="hidden lg:block space-y-6">
+          <div>
+            <label class="block text-xs font-semibold uppercase tracking-wide text-ink/50 mb-2">Course type</label>
+            <div id="f-type" class="space-y-1.5 text-sm"></div>
+          </div>
 
-        <div>
-          <label class="block text-xs font-semibold uppercase tracking-wide text-ink/50 mb-2">Skill level</label>
-          <div id="f-level" class="space-y-1.5 text-sm"></div>
-        </div>
+          <div>
+            <label class="block text-xs font-semibold uppercase tracking-wide text-ink/50 mb-2">Skill level</label>
+            <div id="f-level" class="space-y-1.5 text-sm"></div>
+          </div>
 
-        <div>
-          <label class="block text-xs font-semibold uppercase tracking-wide text-ink/50 mb-2">Max price: <span id="priceLabel" class="text-forest font-medium"></span></label>
-          <input id="f-price" type="range" min="0" max="250" step="5" value="250" class="w-full accent-terra" oninput="applyFilters()" />
-        </div>
+          <div>
+            <label class="block text-xs font-semibold uppercase tracking-wide text-ink/50 mb-2">Max price: <span id="priceLabel" class="text-forest font-medium"></span></label>
+            <input id="f-price" type="range" min="0" max="250" step="5" value="250" class="w-full accent-terra" oninput="applyFilters()" />
+          </div>
 
-        <label class="flex items-center gap-2 text-sm cursor-pointer">
-          <input id="f-ballot" type="checkbox" class="accent-forest" onchange="applyFilters()" />
-          Has free ballot places
-        </label>
+          <label class="flex items-center gap-2 text-sm cursor-pointer">
+            <input id="f-ballot" type="checkbox" class="accent-forest" onchange="applyFilters()" />
+            Has free ballot places
+          </label>
+        </div>
       </aside>
 
       <!-- results -->
@@ -432,6 +437,13 @@ function resetFilters(){
   document.querySelectorAll('.ftype,.flevel').forEach(i=>i.checked=false);
   $('#f-ballot').checked=false; $('#f-price').value=250; $('#sort').value='date';
   applyFilters();
+}
+// Collapse/expand the filter panel on mobile (always open on lg+ via lg:block)
+function toggleFilters(){
+  const b=$('#filterBody'); if(!b) return;
+  b.classList.toggle('hidden');
+  const c=$('#filterChevron');
+  if(c) c.style.transform = b.classList.contains('hidden') ? '' : 'rotate(180deg)';
 }
 function applyFilters(){
   const types = [...document.querySelectorAll('.ftype:checked')].map(i=>i.value);
